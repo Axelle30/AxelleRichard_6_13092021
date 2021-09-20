@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const path = require("path");
 const app = express();
 
-/*const saucesRoutes = require('./routes/sauces');*/
+const saucesRoutes = require('./routes/sauces');
 const userRoutes = require('./routes/user');
 
 mongoose.connect('mongodb+srv://AxelleHotTakeUser:AxelleHotTakesP6Password@axellehottakesp6.kjkfb.mongodb.net/AxelleHotTakesP6?retryWrites=true&w=majority', {
@@ -20,12 +21,9 @@ app.use((req, res, next) => {
   next();
 });
 app.use(bodyParser.json());
-/*app.post('/api/auth/signup', (req,res,next)=> {
-  console.log("Requete recue");
-  next();
-})*/
 
+app.use('/image', express.static(path.join(__dirname, 'image')));
 app.use('/api/auth', userRoutes);
-/*app.use('/api/sauces', saucesRoutes);*/
+app.use('/api/sauces', saucesRoutes);
 
 module.exports = app;
