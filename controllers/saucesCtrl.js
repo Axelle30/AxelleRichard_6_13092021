@@ -21,9 +21,9 @@ exports.createSauces = (req, res, next) => {
         ...sauceObject,
         imageUrl: `${req.protocol}://${req.get('host')}/image/${req.file.filename}`,
         usersLiked: [],
-        usersDisliked: [],
         likes: 0,
-        dislikes: 0
+        dislikes: 0,
+        usersDisliked: [],
 
         
     });
@@ -58,30 +58,55 @@ exports.deleteSauces = (req, res, next) => {
 };
 
 exports.sendLikeDislike = (req, res, next) => {
-    let arrayOfLike = [];
-    let arrayOfDislike = [];
-    let sauceToLike;
+    let userId = req.body.userId;
+    let like = req.body.like;
+    let sauceId = req.params.id;
 
     Sauces.findOne({_id: req.params.id})
-    .then(sauceToFind => {
-        saucesToLike = sauceToFind;
-    })
-    .catch(error => res.status(404).json({error}));
-    
-    if (req.body.like = 1)
-    {
-
-    }
-    else if (req.body.like = 0)
-    {
-
-    }
-    else if (req.body.like = -1)
-    {
-
-    }
-    
-    Sauces.updateOne({_id: req.params.id}, {...req.body, _id: req.params.id})
-        .then(() => res.status(200).json({message: "Mention like dislike prise en compte"}))
-        .catch(error => res.status(400).json({error}));
+        .then(sauceToLike => {
+            let likeCount = sauceToLike.like;
+            let dislikeCount = sauceToLike.disLike;
+            let likeArray = sauceToLike.usersLiked;
+            let dislikeArray = sauceToLike.usersDisliked;
+            if (like == 1){
+                    likeCount++;
+                    likeArray.push(userId)
+                    console.log(dislikeArray);
+                    console.log(sauceToLike.usersDisliked);
+                    console.log(likeArray);
+                    Sauces.updateOne({_id: sauceId}, {like: likeCount, usersLiked: likeArray})
+                        .then(() => res.status(200).json({mesage: "Vous likez cette sauce"}))
+                        .catch(error => res.status(400).json({error}));
+            }
+            else if (like == 0){
+                if (sauceToLike.usersLiked.includes(userId) == true) {
+                    likeCount--;
+                    let cleanLikeArray = likeArray.filter(function(value){
+                        return value !=userId
+                    })
+                    
+                    Sauces.updateOne({_id: sauceId}, {like: likeCount, usersLiked: cleanLikeArray})
+                        .then(() => res.status(200).json({mesage: "Vous ne likez plus cette sauce"}))
+                        .catch(error => res.status(400).json({error}));
+                }
+                else if (dislikeArray.includes(userId) == true) {
+                    dislikeCount--;
+                    let cleanDislikeArray = dislikeArray.filter(function(value){
+                        return value !=userId
+                    })
+                Sauces.updateOne({_id: sauceId}, {dislike: dislikeCount, usersDisliked: cleanDislikeArray})
+                        .then(() => res.status(200).json({mesage: "Vous ne dislikez plus cette sauce"}))
+                        .catch(error => res.status(400).json({error}));
+                }
+            }
+            else if (like == -1){
+                    dislikeCount++;
+                    dislikeArray.push(userId);
+                    console.log(dislikeArray, "PC4");
+                    Sauces.updateOne({_id: sauceId}, {disLike: dislikeCount, usersDisliked : dislikeArray})
+                    .then(() => res.status(200).json({mesage: "Vous dislikez cette sauce"}))
+                    .catch(error => res.status(400).json({error}));
+            }
+        })
+        .catch(error => res.status(500).json({error}));
 };
