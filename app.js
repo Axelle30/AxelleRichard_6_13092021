@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const mongoSanitize = require('express-mongo-sanitize');
 const path = require("path");
 const app = express();
 
@@ -21,6 +22,12 @@ app.use((req, res, next) => {
   next();
 });
 app.use(bodyParser.json());
+
+app.use(
+  mongoSanitize({
+    replaceWith: '_',
+  }),
+);
 
 app.use('/image', express.static(path.join(__dirname, 'image')));
 app.use('/api/auth', userRoutes);

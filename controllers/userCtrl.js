@@ -6,7 +6,7 @@ const User = require('../models/User');
 
 
 exports.signUp = (req, res, next) => {
-    bcrypt.hash(req.body.password, 1)
+    bcrypt.hash(req.body.password, 10)
     .then(hash => {
         const newUser = new User({
             email: req.body.email,
@@ -30,7 +30,7 @@ exports.login = (req, res, next) => {
             if (!valid) {
                 return res.status(401).json({error: "Mot de passe incorrect"});  
             }
-            console.log("Prob 4", user._id);
+            console.log(user._id);
             const token = jwt.sign(
                 {userId: user._id},
                 '6H5m1e5x9CJyJ0t9hmzkICvmu6NrzscVVjPMRrrdz6k3uKuh',
